@@ -25,7 +25,12 @@ export default function PickUsers() {
           className="px-2 py-1 mr-2 border-2 mb-2 border-black rounded-xl  focus:outline-none focus:border-blue-600 bg-gray-300"
           key={ind}
           tabIndex={0}
-          onKeyDown={() => removeChip(ele)}
+          onKeyDown={(e) => {
+            if (e.key === "Backspace") {
+              console.log(e.key);
+              removeChip(ele);
+            }
+          }}
         >
           <div className="flex items-center">
             <span className="mr-2 ">{ele}</span>
