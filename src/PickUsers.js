@@ -8,6 +8,7 @@ export default function PickUsers() {
   const [selected, setSelected] = useState([]);
   const [showList, setShowList] = useState(false);
   const listRef = useRef();
+  const selRef = useRef();
   const inputRef = useRef();
 
   let listItems = [];
@@ -15,13 +16,16 @@ export default function PickUsers() {
     names.push(ele);
     setSelected(selected.filter((x) => x != ele));
     setSearchText("");
+    inputRef.current.focus();
   };
   const renderChips = () => {
     return selected.map((ele, ind) => {
       return (
         <div
-          className="px-2 py-1 mr-2 border mb-2 border-black rounded-xl bg-gray-300"
+          className="px-2 py-1 mr-2 border-2 mb-2 border-black rounded-xl  focus:outline-none focus:border-blue-600 bg-gray-300"
           key={ind}
+          tabIndex={0}
+          onKeyDown={() => removeChip(ele)}
         >
           <div className="flex items-center">
             <span className="mr-2 ">{ele}</span>
@@ -39,6 +43,11 @@ export default function PickUsers() {
     if (e.key === "ArrowDown" && listItems.length >= 1) {
       e.preventDefault();
       listItems[0].focus();
+    }
+    let nam = e.target.value;
+    let items = selRef.current.childNodes;
+    if (e.key === "Backspace" && nam === "" && items.length > 0) {
+      items[items.length - 1].focus();
     }
   };
 
@@ -80,7 +89,7 @@ export default function PickUsers() {
     <div className="mt-20 mx-32">
       <div className="">
         <div className="flex flex-wrap items-center border-b-4 border-blue-700">
-          <div className="flex flex-wrap" id="input">
+          <div ref={selRef} className="flex flex-wrap" id="input">
             {renderChips()}
           </div>
           <input
