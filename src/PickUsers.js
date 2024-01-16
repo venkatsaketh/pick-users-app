@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { data } from "./contants";
 import { RxCross2 } from "react-icons/rx";
 let names = data;
@@ -7,10 +7,14 @@ export default function PickUsers() {
   const [fil, setFil] = useState(names);
   const [selected, setSelected] = useState([]);
   const [showList, setShowList] = useState(false);
+  const listRef = useRef();
+  const inputRef = useRef();
 
+  let listItems = [];
   const removeChip = (ele) => {
     names.push(ele);
     setSelected(selected.filter((x) => x != ele));
+    setSearchText("");
   };
   const renderChips = () => {
     return selected.map((ele, ind) => {
@@ -29,11 +33,33 @@ export default function PickUsers() {
       );
     });
   };
-  useEffect(() => {
-    document
-      .getElementById("input")
-      .addEventListener("onClick", () => setShowList(true));
-  });
+
+  const inputkeyDown = (e) => {
+    listItems = listRef.current.childNodes;
+    if (e.key === "ArrowDown" && listItems.length >= 1) {
+      e.preventDefault();
+      listItems[0].focus();
+    }
+  };
+
+  const listkeydown = (e) => {
+    e.preventDefault();
+    listItems = listRef.current.childNodes;
+    let cur = e.target;
+    let n = listItems.length;
+    let i = 0;
+    for (; i < n; i++) {
+      if (listItems[i] == cur) break;
+    }
+    if (e.keyCode == 40) {
+      if (i != n - 1) listItems[i + 1].focus();
+    } else if (e.keyCode == 38) {
+      if (i != 0) listItems[i - 1].focus();
+    } else if (e.keyCode == 13) {
+      selectUser(e.target.innerText);
+    }
+  };
+
   useEffect(() => {
     setFil(names);
   }, [selected]);
@@ -48,6 +74,7 @@ export default function PickUsers() {
     setSelected([...selected, text]);
     names = names.filter((x) => x != text);
     setSearchText("");
+    inputRef.current.focus();
   };
   return (
     <div className="mt-20 mx-32">
@@ -58,25 +85,32 @@ export default function PickUsers() {
           </div>
           <input
             type="text"
-            id="input"
+            ref={inputRef}
+            tabIndex={0}
             placeholder="Add new user ..."
+            onKeyDown={inputkeyDown}
             onClick={() => setShowList(true)}
             value={searchText}
             onChange={handeChange}
-            className=" flex-1 w-full outline-none py-4 px-2 text-lg font-semibold"
+            className="flex-1 w-full outline-none py-4 px-2 text-lg font-semibold"
           />
         </div>
         {showList && (
-          <div className=" mt-1 w-2/4 p-2 bg-white shadow-lg rounded-bl rounded-br max-h-56 overflow-y-auto">
+          <div
+            id="list"
+            ref={listRef}
+            className="mt-1 w-2/4 p-2 bg-white shadow-lg rounded-bl rounded-br max-h-56 overflow-y-auto"
+          >
             {fil.map((nam, index) => {
               return (
-                <div className="text-left" key={index}>
-                  <p
-                    className="m-2 font-semibold cursor-pointer"
-                    onClick={() => selectUser(nam)}
-                  >
-                    {nam}
-                  </p>
+                <div
+                  className="text-left m-2 font-semibold cursor-pointer focus:bg-gray-200 outline-none"
+                  onKeyDown={listkeydown}
+                  onClick={() => selectUser(nam)}
+                  key={index}
+                  tabIndex={0}
+                >
+                  {nam}
                 </div>
               );
             })}
